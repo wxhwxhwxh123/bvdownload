@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B站视频爬取器 - 下载页面</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00bfff;
+            --secondary-color: #00ffcc;
+            --light-color: #1a1a1a;
+            --dark-color: #000000;
+            --accent-color: #ff4d4d;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8b8;
+            --card-bg: rgba(30, 30, 30, 0.85);
+        }
+        
+        .container {
+            max-width: 1200px;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+            background-color: var(--dark-color);
+            color: var(--text-primary);
+            position: relative;
+            overflow-x: hidden;
+            text-align: center;
+        }
+        
+        /* 科技感动态背景 */
+        body {
+            background-color: #000000;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 191, 255, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(0, 255, 204, 0.05) 0%, transparent 20%);
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 动态网格背景 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(0, 191, 255, 0.1) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 191, 255, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+            animation: moveGrid 30s linear infinite;
+        }
+        
+        @keyframes moveGrid {
+            0% { background-position: 0 0; }
+            100% { background-position: 30px 30px; }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(0, 255, 204, 0.2));
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            padding: 40px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 5px 30px rgba(0, 191, 255, 0.3);
+            border-bottom: 1px solid rgba(0, 191, 255, 0.3);
+        }
+        
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-image: url('icon.jpg');
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(0, 191, 255, 0.7);
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #00bfff, #00ffcc, #00bfff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: gradientText 3s linear infinite;
+        }
+        
+        @keyframes gradientText {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        /* 滚动播放图片样式 */
+        .carousel-container {
+            width: 100%;
+            max-width: 700px;
+            height: 400px;
+            margin: 40px auto;
+            overflow: hidden;
+            position: relative;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            height: 100%;
+        }
+        
+        .carousel img {
+            width: 100%;
+            height: 100%;
+            min-width: 100%;
+            object-fit: contain;
+            border-radius: 15px;
+        }
+        
+        /* 轮播图控制按钮 */
+        .carousel-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 191, 255, 0.3);
+            border: 2px solid rgba(0, 191, 255, 0.5);
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+            z-index: 10;
+        }
+        
+        .carousel-control:hover {
+            background-color: rgba(0, 191, 255, 0.6);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.8);
+        }
+        
+        .carousel-control.prev {
+            left: 20px;
+        }
+        
+        .carousel-control.next {
+            right: 20px;
+        }
+        
+        /* 轮播图指示器 */
+        .carousel-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .carousel-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(0, 191, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-indicator.active {
+            background-color: rgba(0, 191, 255, 0.8);
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.8);
+        }
+        
+        .carousel-indicator:hover:not(.active) {
+            background-color: rgba(0, 191, 255, 0.5);
+        }
+        
+        /* 功能特点卡片 */
+        .feature-card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(0, 191, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 191, 255, 0.1);
+            backdrop-filter: blur(5px);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 30px;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 191, 255, 0.3);
+            border-color: rgba(0, 191, 255, 0.5);
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+        
+        .feature-description {
+            color: var(--text-secondary);
+            flex-grow: 1;
+        }
+        
+        /* 回到顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00bfff, #0080ff);
+            border: 2px solid rgba(0, 191, 255, 0.5);
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(0, 191, 255, 0.4), 0 0 15px rgba(0, 191, 255, 0.6);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+        }
+        
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 191, 255, 0.6), 0 0 25px rgba(0, 191, 255, 0.8);
+            border-color: rgba(0, 191, 255, 0.8);
+        }
+        
+        .version-badge {
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.2), rgba(0, 191, 255, 0.2));
+            color: var(--secondary-color);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-block;
+            border: 1px solid rgba(0, 255, 204, 0.5);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(0, 191, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 191, 255, 0.1);
+            margin-bottom: 30px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 191, 255, 0.3);
+            border-color: rgba(0, 191, 255, 0.5);
+        }
+        
+        .card-header {
+            background-color: rgba(0, 191, 255, 0.1);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 191, 255, 0.2);
+        }
+        
+        .card-body {
+            padding: 30px;
+            color: var(--text-primary);
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #00bfff, #0080ff);
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 50px;
+            border: 2px solid rgba(0, 191, 255, 0.5);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 191, 255, 0.4), 0 0 15px rgba(0, 191, 255, 0.6);
+            width: 100%;
+            max-width: 350px;
+            display: block;
+            margin: 0 auto;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .download-btn:hover::before {
+            left: 100%;
+        }
+        
+        .download-btn:hover {
+            background: linear-gradient(135deg, #0080ff, #00bfff);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 191, 255, 0.6), 0 0 25px rgba(0, 191, 255, 0.8);
+            border-color: rgba(0, 191, 255, 0.8);
+        }
+        
+        /* 反馈按钮样式 */
+        .feedback-btn {
+            background: linear-gradient(135deg, #ff6699, #cc3366);
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            border: 2px solid rgba(255, 102, 153, 0.5);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 102, 153, 0.3), 0 0 10px rgba(255, 102, 153, 0.5);
+            width: 100%;
+            max-width: 250px;
+            display: block;
+            margin: 15px auto 0;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+        
+        .feedback-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .feedback-btn:hover::before {
+            left: 100%;
+        }
+        
+        .feedback-btn:hover {
+            background: linear-gradient(135deg, #cc3366, #ff6699);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 102, 153, 0.5), 0 0 20px rgba(255, 102, 153, 0.7);
+            border-color: rgba(255, 102, 153, 0.8);
+            color: white;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .author-card {
+            background-color: rgba(30, 30, 30, 0.85);
+            border: 1px solid rgba(0, 191, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 191, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .author-card h3 {
+            color: var(--text-primary);
+            text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+        }
+        
+        .author-card p {
+            color: var(--text-secondary);
+        }
+        
+        .footer {
+            background-color: rgba(0, 0, 0, 0.9);
+            color: var(--text-secondary);
+            padding: 30px 0;
+            margin-top: 60px;
+            border-radius: 30px 30px 0 0;
+            border-top: 1px solid rgba(0, 191, 255, 0.3);
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+                text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .card-body {
+                padding: 20px;
+            }
+            
+            .download-btn {
+                font-size: 1.1rem;
+                max-width: 100%;
+            }
+        }
+        
+        /* 添加科技感粒子效果 */
+        .particle {
+            position: fixed;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            animation: float 8s infinite ease-in-out;
+            opacity: 0.5;
+            filter: blur(1px);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-10px) translateX(5px); }
+            50% { transform: translateY(0) translateX(10px); }
+            75% { transform: translateY(10px) translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+            <div class="logo-container">
+                <div class="logo"></div>
+            </div>
+            <h1>B站视频爬取器</h1>
+            <p>轻松下载B站视频，支持多种画质选择（下滑至下方下载）</p>
+            <div class="version-badge">版本 5.0</div>
+        </div>
+    </div>
+    
+    <!-- 滚动播放图片展示栏 -->
+    <div class="carousel-container">
+        <div class="carousel" id="carousel">
+            <img src="屏幕截图 2025-11-16 164359.png" alt="界面截图1">
+            <img src="屏幕截图 2025-11-16 182713.png" alt="界面截图2">
+            <img src="屏幕截图 2025-11-16 182746.png" alt="界面截图3">
+            <img src="屏幕截图 2025-11-16 182805.png" alt="界面截图4">
+        </div>
+        <!-- 轮播图控制按钮 -->
+        <div class="carousel-control prev" id="prevBtn">‹</div>
+        <div class="carousel-control next" id="nextBtn">›</div>
+        <!-- 轮播图指示器 -->
+        <div class="carousel-indicators" id="carouselIndicators">
+            <div class="carousel-indicator active" data-index="0"></div>
+            <div class="carousel-indicator" data-index="1"></div>
+            <div class="carousel-indicator" data-index="2"></div>
+            <div class="carousel-indicator" data-index="3"></div>
+        </div>
+    </div>
+    
+    <!-- 软件功能特点 -->
+    <div class="container" style="margin-bottom: 60px;">
+        <div class="row justify-content-center" style="margin-bottom: 40px;">
+            <div class="col-lg-8 text-center">
+                <h2 style="margin-bottom: 20px;">强大功能，简单操作</h2>
+                <p class="text-secondary">B站视频爬取器为您提供高效、稳定的视频下载体验</p>
+            </div>
+        </div>
+        <div class="row gap-6">
+            <div class="col-lg-3 col-md-6 feature-card">
+                <div class="feature-icon">🎬</div>
+                <h3 class="feature-title">视频完整</h3>
+                <p class="feature-description">视频和音频完美合并，有声音有画面（B站视频和音频原本是分开的）。</p>
+            </div>
+            <div class="col-lg-3 col-md-6 feature-card">
+                <div class="feature-icon">🔮</div>
+                <h3 class="feature-title">小组件</h3>
+                <p class="feature-description">提供小组件功能，方便您在桌面快速访问和操作。</p>
+            </div>
+            <div class="col-lg-3 col-md-6 feature-card">
+                <div class="feature-icon">📺</div>
+                <h3 class="feature-title">多清晰度选择</h3>
+                <p class="feature-description">提供多种视频清晰度选项，满足不同场景下的观看需求和存储空间限制。</p>
+            </div>
+            <div class="col-lg-3 col-md-6 feature-card">
+                <div class="feature-icon">📝</div>
+                <h3 class="feature-title">历史记录</h3>
+                <p class="feature-description">自动保存下载历史，方便您随时查看和管理已下载的视频文件。</p>
+            </div>
+            <div class="col-lg-3 col-md-6 feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3 class="feature-title">简洁界面</h3>
+                <p class="feature-description">直观易用的界面设计，让您无需复杂操作即可完成视频下载，轻松上手。</p>
+            </div>
+            <div class="col-lg-3 col-md-6 feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3 class="feature-title">收藏夹</h3>
+                <p class="feature-description">可以直接把重要的视频收藏到收藏夹，方便后续查看和管理。</p>
+            </div>
+        </div>
+    </div>
+    
+        <!-- Widget Section -->
+        <section class="widget-section" id="widget" style="padding: 80px 0; background-color: #fff;">
+            <div class="container">
+                <h2 class="section-title" style="margin-bottom: 20px;">智能小组件功能</h2>
+                <p class="section-description" style="margin-bottom: 50px; color: #666;">方便快捷的桌面小组件，提升您的使用体验</p>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="widget-card" style="background-color: var(--primary-color); padding: 30px; border-radius: 15px; box-shadow: var(--shadow);">
+                            <h3 style="margin-bottom: 20px; color: white;">主要功能</h3>
+                            <ul style="list-style-type: none; padding: 0; margin-bottom: 30px; text-align: left; display: inline-block; color: white;">
+                                <li style="margin-bottom: 10px; padding-left: 25px; position: relative;"><span style="position: absolute; left: 0; color: white;">✓</span> 桌面悬浮窗口，随时使用</li>
+                                <li style="margin-bottom: 10px; padding-left: 25px; position: relative;"><span style="position: absolute; left: 0; color: white;">✓</span> 快捷键支持（Ctrl+Alt+B打开Bilibili）</li>
+                                <li style="margin-bottom: 10px; padding-left: 25px; position: relative;"><span style="position: absolute; left: 0; color: white;">✓</span> 快速下载、收藏夹、历史记录</li>
+                                <li style="margin-bottom: 10px; padding-left: 25px; position: relative;"><span style="position: absolute; left: 0; color: white;">✓</span> 可折叠设计，节省桌面空间</li>
+                                <li style="margin-bottom: 10px; padding-left: 25px; position: relative;"><span style="position: absolute; left: 0; color: white;">✓</span> 系统托盘支持，随时访问</li>
+                            </ul>
+                            <img src="小组件.png" alt="小组件界面" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: var(--shadow);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    
+    <script>
+        // 滚动播放图片的JavaScript
+        const carousel = document.getElementById('carousel');
+        const images = carousel.querySelectorAll('img');
+        let currentIndex = 0;
+        const SLIDE_INTERVAL = 3000; // 统一的切换间隔时间（毫秒）
+        
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % images.length;
+            updateCarousel();
+        }
+        
+        function updateCarousel() {
+            carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+            
+            // 更新指示器状态
+            const indicators = document.querySelectorAll('.carousel-indicator');
+            indicators.forEach((indicator, i) => {
+                if (i === currentIndex) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
+        
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            updateCarousel();
+        }
+        
+        // 重置轮播定时器函数
+        function resetCarouselTimer() {
+            // 确保清除之前的定时器
+            if (slideInterval) {
+                clearInterval(slideInterval);
+            }
+            // 设置新的定时器
+            slideInterval = setInterval(nextSlide, SLIDE_INTERVAL);
+        }
+        
+        // 设置自动轮播
+        let slideInterval = setInterval(nextSlide, SLIDE_INTERVAL);
+        
+        // 为控制按钮添加事件监听
+        if (document.getElementById('prevBtn')) {
+            document.getElementById('prevBtn').addEventListener('click', () => {
+                clearInterval(slideInterval);
+                prevSlide();
+                resetCarouselTimer();
+            });
+        }
+        
+        if (document.getElementById('nextBtn')) {
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                clearInterval(slideInterval);
+                nextSlide();
+                resetCarouselTimer();
+            });
+        }
+        
+        // 为指示器添加事件监听
+        if (document.getElementById('carouselIndicators')) {
+            document.querySelectorAll('.carousel-indicator').forEach(indicator => {
+                indicator.addEventListener('click', () => {
+                    clearInterval(slideInterval);
+                    currentIndex = parseInt(indicator.dataset.index);
+                    updateCarousel();
+                    resetCarouselTimer();
+                });
+            });
+        }
+        
+        // 鼠标悬停时暂停轮播
+        const carouselContainer = document.querySelector('.carousel-container');
+        if (carouselContainer) {
+            carouselContainer.addEventListener('mouseenter', () => {
+                clearInterval(slideInterval);
+            });
+            
+            carouselContainer.addEventListener('mouseleave', () => {
+                resetCarouselTimer();
+            });
+        }
+        
+        // 初始更新轮播图指示器状态
+        updateCarousel();
+    </script>
+    
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop">↑</button>
+    
+    <script>
+        // 回到顶部按钮功能
+        const backToTopButton = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+    
+    <div class="container">
+        <!-- 软件简介 -->
+        <div class="row mb-5">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">软件简介</div>
+                    <div class="card-body">
+                        <p>作者当时是因为要下载b站上面的视频而有了这个工具，目前仅支持windows，技术有限，不过功能挺齐全，需要安装python环境。本软件是一个基于Python环境、you-get（https://github.com/soimort/you-get）的视频下载软件，下载的视频有声音也有画面。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 下载安装向导 -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 col-md-10">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-4">下载安装向导</h3>
+                        <p class="mb-5">点击下方按钮下载B站视频爬取器5.0安装向导</p>
+                       <a href="https://wwbfm.lanzoue.com/iEtnU3czcq1a" class="download-btn" target="_blank">立即下载</a>
+                        <p class="mt-4 text-muted">支持系统：Windows</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 反馈问题 -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 col-md-10">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-4">反馈问题</h3>
+                        <p class="mb-5">如果您在使用过程中遇到任何问题，请点击下方按钮向作者反馈</p>
+                        <a href="https://www.bilibili.com/opus/1135808100099424261?spm_id_from=333.1365.0.0" class="feedback-btn" target="_blank">前往反馈</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="author-card">
+                    <h3 class="mb-3">作者信息</h3>
+                    <p><strong>编程猫社区：</strong>取昵称咋这么难</p>
+                    <p><strong>Bilibili：</strong>大蚊子_xixi</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer text-center">
+        <div class="container">
+            <p>&copy; 2024 B站视频爬取器 - 仅供学习使用</p>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 管理员模式相关变量和元素
+        let adminModeActive = false;
+        
+        // 监听w快捷键
+        document.addEventListener('keydown', function(e) {
+            // 检查当前焦点是否在输入元素上
+            const isInputFocused = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName);
+            if (!isInputFocused && e.key === 'w') {
+                e.preventDefault();
+                if (!adminModeActive) {
+                    openAdminMode();
+                }
+            }
+        });
+        
+        // 打开管理员模式
+        function openAdminMode() {
+            // 创建管理员模式模态框
+            const modalHTML = `
+                <div id="adminModal" class="modal fade" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content bg-dark border-primary">
+                            <div class="modal-header border-primary">
+                                <h5 class="modal-title text-primary">管理员模式</h5>
+                                <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="passwordSection">
+                                    <p class="text-white mb-3">请输入管理员密码：</p>
+                                    <input type="password" id="adminPassword" class="form-control mb-3 bg-secondary text-white" placeholder="输入密码...">
+                                    <button id="verifyPassword" class="btn btn-primary w-100">验证密码</button>
+                                    <p id="passwordError" class="text-danger mt-2 d-none">密码错误，请重试</p>
+                                </div>
+                                <div id="editSection" class="d-none">
+                                    <div class="mb-3">
+                                        <label class="text-white">页面标题：</label>
+                                        <input type="text" id="pageTitle" class="form-control bg-secondary text-white">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="text-white">页面描述：</label>
+                                        <input type="text" id="pageDescription" class="form-control bg-secondary text-white">
+                                    </div>
+                                    <div id="downloadItems">
+                                        <div class="download-item p-3 bg-secondary bg-opacity-50 rounded mb-3">
+                                            <div class="mb-2">
+                                                <label class="text-white">下载标题：</label>
+                                                <input type="text" class="form-control bg-dark text-white download-title">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="text-white">下载描述：</label>
+                                                <input type="text" class="form-control bg-dark text-white download-desc">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="text-white">下载链接：</label>
+                                                <input type="text" class="form-control bg-dark text-white download-link">
+                                            </div>
+                                            <button class="btn btn-danger btn-sm remove-item">删除</button>
+                                        </div>
+                                    </div>
+                                    <button id="addItem" class="btn btn-success mb-3">添加下载项</button>
+                                    <button id="saveChanges" class="btn btn-primary w-100">保存更改</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 添加到body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // 显示模态框，禁用背景遮罩防止页面变暗
+            const adminModal = new bootstrap.Modal(document.getElementById('adminModal'), { backdrop: false });
+            adminModal.show();
+            
+            // 验证密码按钮事件
+            document.getElementById('verifyPassword').addEventListener('click', verifyAdminPassword);
+            
+            // 密码输入框回车事件
+            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    verifyAdminPassword();
+                }
+            });
+        }
+        // 验证管理员密码
+        function verifyAdminPassword() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === 'wxhwy123') {
+                // 密码正确，显示编辑区域
+                document.getElementById('passwordSection').classList.add('d-none');
+                document.getElementById('editSection').classList.remove('d-none');
+                document.getElementById('passwordError').classList.add('d-none');
+                adminModeActive = true;
+                
+                // 填充当前页面数据
+                document.getElementById('pageTitle').value = document.querySelector('.header h1').textContent;
+                document.getElementById('pageDescription').value = document.querySelector('.header p').textContent;
+                
+                // 填充下载项数据
+                const downloadCard = document.querySelector('.card');
+                if (downloadCard) {
+                    const titleInput = document.querySelector('.download-title');
+                    const descInput = document.querySelector('.download-desc');
+                    const linkInput = document.querySelector('.download-link');
+                    
+                    if (titleInput && descInput && linkInput) {
+                        titleInput.value = downloadCard.querySelector('h3').textContent || '';
+                        descInput.value = downloadCard.querySelector('p').textContent || '';
+                        linkInput.value = "https://developer-oss.lanrar.com/file/?UDZbZV5vU2JSWwI6VGFXO1tkVW0APVeyAa0GmVDkUfdX0VXrCvVSl1XkVIoB+QbiWo9TwFDqB5wEq1toXS9QYVBwW+lerVOOUuwC91SFV7NbkVXBALpX+gG6Bi5QaVEoVzJVJAoxUm9Vb1RnAQoGblpkU2tQPQczBDFbaF0wUGRQYFs1XjdTIVJiAidUPVdnWzZVaQBvV2cBMAY2UDVRYldxVXIKJ1I7VTFUMgFnBjJaL1NnUD4HKgQyW2tdLlAzUGdbNF5mU2RSZgJhVGRXY1syVTUAOlc0AWAGNlA7UWVXNFU2CjRSYlU3VDsBYwY2WmNTNFA6BzEEYVtvXTBQf1A1W3ReZlMhUnECJ1RlVyRbaFU0AGJXYQE+BjdQPFFlV2VVMwpxUnJValRvATAGYVo9U2dQOAczBDBbal04UGFQY1s9XjRTKVIqAnJUZlc6W3ZVbQBuV2IBMAYzUDhRZFdlVTAKYlI3VSVUdwElBnBaPVNnUDgHMwQwW29dOVBjUGJbOV40UyFScQI9VHBXa1swVWEAbVd7ATQGMlAiUWJXY1U1CnlSNFU3VDYBewYhWmRTOVB4B2sEXFs+XWpQbFBgWyJeJVNzUn0CJFRlVwlbdFUxAGJXZQ==" || '';
+                    }
+                }
+                
+                // 添加事件监听器
+                document.getElementById('addItem').addEventListener('click', addDownloadItem);
+                document.getElementById('saveChanges').addEventListener('click', saveAdminChanges);
+                
+                // 为初始的删除按钮添加事件
+                document.querySelector('.remove-item').addEventListener('click', function() {
+                    if (document.querySelectorAll('.download-item').length > 1) {
+                        this.closest('.download-item').remove();
+                    }
+                });
+            } else {
+                // 密码错误
+                document.getElementById('passwordError').classList.remove('d-none');
+            }
+        }
+        
+        // 添加新的下载项
+        function addDownloadItem() {
+            const downloadItems = document.getElementById('downloadItems');
+            const newItem = document.createElement('div');
+            newItem.className = 'download-item p-3 bg-secondary bg-opacity-50 rounded mb-3';
+            newItem.innerHTML = `
+                <div class="mb-2">
+                    <label class="text-white">下载标题：</label>
+                    <input type="text" class="form-control bg-dark text-white download-title">
+                </div>
+                <div class="mb-2">
+                    <label class="text-white">下载描述：</label>
+                    <input type="text" class="form-control bg-dark text-white download-desc">
+                </div>
+                <div class="mb-2">
+                    <label class="text-white">下载链接：</label>
+                    <input type="text" class="form-control bg-dark text-white download-link">
+                </div>
+                <button class="btn btn-danger btn-sm remove-item">删除</button>
+            `;
+            downloadItems.appendChild(newItem);
+            
+            // 添加删除事件
+            newItem.querySelector('.remove-item').addEventListener('click', function() {
+                if (document.querySelectorAll('.download-item').length > 1) {
+                    this.closest('.download-item').remove();
+                }
+            });
+        }
+        
+        // 保存管理员更改
+        function saveAdminChanges() {
+            // 更新页面标题和描述
+            document.querySelector('.header h1').textContent = document.getElementById('pageTitle').value;
+            document.querySelector('.header p').textContent = document.getElementById('pageDescription').value;
+            
+            // 更新下载项
+            const downloadItems = document.querySelectorAll('.download-item');
+            const downloadContainer = document.querySelector('.row.justify-content-center.mb-5');
+            
+            // 清空现有下载卡片
+            downloadContainer.innerHTML = '';
+            
+            // 添加新的下载卡片
+            downloadItems.forEach(item => {
+                const title = item.querySelector('.download-title').value || '未命名下载';
+                const desc = item.querySelector('.download-desc').value || '下载描述';
+                const link = item.querySelector('.download-link').value || '#';
+                
+                // 确保链接使用正确的格式
+                let formattedLink = link;
+                // 对于非http链接，直接使用原始链接
+                if (link.startsWith('http')) {
+                    formattedLink = link;
+                }
+                
+                const cardHTML = `
+                    <div class="col-lg-8 col-md-10">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h3 class="mb-4">${title}</h3>
+                                <p class="mb-5">${desc}</p>
+                               <a href="https://wwbfm.lanzoue.com/iEtnU3czcq1a" class="download-btn" target="_blank">立即下载</a>
+                                <p class="mt-4 text-muted">支持系统：Windows</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                downloadContainer.insertAdjacentHTML('beforeend', cardHTML);
+            });
+            
+            // 关闭模态框
+            const adminModal = bootstrap.Modal.getInstance(document.getElementById('adminModal'));
+            adminModal.hide();
+            
+            // 显示成功提示
+            alert('更改已保存！');
+        }
+        
+        // 生成科技感粒子背景
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesCount = 20;
+            
+            for (let i = 0; i < particlesCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // 随机大小、位置和动画延迟
+                const size = Math.random() * 4 + 1; // 1-5px
+                const posX = Math.random() * 100; // 0-100%
+                const posY = Math.random() * 100; // 0-100%
+                const delay = Math.random() * 5; // 0-5s 延迟
+                const duration = Math.random() * 10 + 5; // 5-15s 动画周期
+                const opacity = Math.random() * 0.3 + 0.1; // 0.1-0.4 透明度
+                const scale = Math.random() * 0.5 + 0.5; // 0.5-1 缩放
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.opacity = opacity;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.transform = `scale(${scale})`;
+                
+                // 随机颜色
+                const colors = ['#00bfff', '#00ffcc', '#0080ff', '#00ffff'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.backgroundColor = color;
+                
+                document.body.appendChild(particle);
+            }
+            
+            // 添加鼠标跟随效果
+            document.addEventListener('mousemove', function(e) {
+                const particles = document.querySelectorAll('.particle');
+                particles.forEach(particle => {
+                    const dx = e.clientX - particle.getBoundingClientRect().left - particle.offsetWidth / 2;
+                    const dy = e.clientY - particle.getBoundingClientRect().top - particle.offsetHeight / 2;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 150) { // 在150px范围内有反应
+                        const moveX = dx / distance * 10 * (1 - distance / 150);
+                        const moveY = dy / distance * 10 * (1 - distance / 150);
+                        particle.style.transform = `translate(${moveX}px, ${moveY}px) scale(1.2)`;
+                        particle.style.opacity = 0.7;
+                    } else {
+                        particle.style.transform = '';
+                        particle.style.opacity = particle.getAttribute('data-opacity') || 0.5;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
